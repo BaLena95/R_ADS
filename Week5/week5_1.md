@@ -287,7 +287,14 @@ ggplot(baseball, aes(x=CWalks, y=career_hr))+
 # 20. Split up this plot into three parts based on the salary range variable you calculated. Use the facet_wrap() function for this; look at the examples in the help file for tips.
 
 ```{r}
+  baseball_plot_1 <- 
+    ggplot(baseball, aes(x = CWalks, y = career_hr)) +
+    geom_point(color = "blue")+
+    xlim(0,1600) +
+    ylim(0,0.4)+
+    labs(y = "ran home", title = "Home Run`s x CWalks") +     facet_wrap(vars(Salary_split))
 
+baseball_plot_1
 ```
 
 ### Faceting can help interpretation. In this case, we can see that high-salary earners are far away from the point (0, 0) on average, but that there are low-salary earners which are even further away. Faceting should preferably be done using a factor variable. The order of the facets is taken from the levels() of the factor. Changing the order of the facets can be done using fct_relevel() if needed.
