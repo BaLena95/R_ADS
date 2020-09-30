@@ -1,0 +1,333 @@
+---
+title: "practice_week5"
+output: html_document
+---
+
+"R for Data Science" 
+
+```{r}
+library(tidyverse)
+```
+
+3.2.2 Creating a ggplot
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+```{r}
+head(mpg)
+
+```
+```{r}
+ggplot2::mpg
+```
+```{r}
+?mpg
+```
+Fuel economy data from 1999 to 2008 for 38 popular models of cars
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = class, y = drv))
+```
+
+3.3. Aesthetic Mapping
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color=class))
+```
+
+```{r}
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, alpha=class))
+```
+
+3.3.1 Exercises
+Notice that the color has to be outside of the brackets as it doesn't contain a variable like the other info in thte aes brackets 
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), color = "blue")
+```
+
+
+```{r}
+head(mpg)
+```
+If there's a variable mapped twice (hwy) then it will still show it
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, alpha=hwy))
+```
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color=displ<5 ))
+```
+3.5 Facets
+
+another way to add variables; categorial especially is with Facets
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+```
+ to facet on two variables use ~ between the two variables 
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(drv ~ cyl)
+```
+
+that way it doesn't facet in rows columns but puts it all in one
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(. ~ cyl)
+```
+
+3.5.1 Exercises
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(. ~ year)
+```
+
+What do the gaps mean? (missing values)
+```{r}
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = drv, y = cyl))
+```
+
+3.6 Geometric Objects
+
+geoms= different visual objects to represent the data
+e.g. bar chart uses bar geoms except for scatter plot which uses point geoms
+
+```{r}
+# left
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+
+# right
+ggplot(data = mpg) + 
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+```
+
+
+```{r}
+ggplot(data = mpg) + 
+  geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv))
+
+```
+```{r}
+ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+              
+ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, group = drv))
+    
+ggplot(data = mpg) +
+  geom_smooth(
+    mapping = aes(x = displ, y = hwy, color = drv),
+    show.legend = FALSE)
+```
+3.6.1 Exercise
+
+1. What geom would you use to draw a line chart? A boxplot? A histogram? An area chart?
+
+line chart: geom_line()
+boxplot: geom_boxplot()
+histogram: geom_histogram()
+area chart: geom_area()
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) +
+  geom_point() + 
+  geom_smooth(se = FALSE)
+```
+the se argument adds the area around the lines that represents the standard error; it's true by default
+
+
+3.7 Statistical transofotmation 
+
+bar charts
+
+- bar charts, histograms, and frequency polygons bin your data and then plot bin counts, the number of points that fall in each bin.
+
+- smoothers fit a model to your data and then plot predictions from the model.
+
+- boxplots compute a robust summary of the distribution and then display a specially formatted box.
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut))
+```
+stat_count can be used like geom_bar
+
+ususally bar chart uses either the count of the rows for the values. One can override that in case the values of the rows matter and not just the row itself
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = stat(prop), group = 1))
+```
+to use the proportions and not the count of the data y=stat(prop)
+
+```{r}
+?geom_col
+```
+There are two types of bar charts: geom_bar() and geom_col(). geom_bar() makes the height of the bar proportional to the number of cases in each group (or if the weight aesthetic is supplied, the sum of the weights). If you want the heights of the bars to represent values in the data, use geom_col() instead. geom_bar() uses stat_count() by default: it counts the number of cases at each x position. geom_col() uses stat_identity(): it leaves the data as is.
+
+```{r}
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill= cut))
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity))
+```
+
+3.8 Position adjustments 
+
+```{r}
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) + 
+  geom_bar(alpha = 1/5, position = "identity")
+
+ggplot(data = diamonds, mapping = aes(x = cut, colour = clarity)) + 
+  geom_bar(fill = NA, position = "identity")
+```
+position = "dodge" places overlapping objects directly beside one another. This makes it easier to compare individual values
+
+```{r}
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity), position="dodge") + 
+  geom_bar()
+```
+
+
+The values of hwy and displ are rounded so the points appear on a grid and many points overlap each other. This problem is known as overplotting.
+
+position = "jitter" adds a small amount of random noise to each point.
+ geom_jitter()
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), position = "jitter")
+
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+3.8.1 Exercises 
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) + 
+  geom_jitter()
+
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) + 
+  geom_count()
+```
+
+3.9 Coordinate systems
+
+default coordinate system is the Cartesian coordinate system
+coord_flip() switches the x and y axes. 
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) + 
+  geom_boxplot()
+
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) + 
+  geom_boxplot() +
+  coord_flip()
+```
+coord_quickmap() sets the aspect ratio correctly for maps.
+
+```{r}
+install.packages('maps')
+library('maps')
+
+usa <- map_data("usa")
+
+ggplot(usa, aes(long, lat, group = group)) +
+  geom_polygon(fill = "white", colour = "black")+
+  coord_quickmap()
+```
+coord_polar() uses polar coordinates
+
+```{r}
+bar <- ggplot(data = diamonds) + 
+  geom_bar(
+    mapping = aes(x = cut, fill = cut), 
+    show.legend = FALSE,
+    width = 1
+  ) + 
+  theme(aspect.ratio = 1) +
+  labs(x = NULL, y = NULL)
+
+bar + coord_flip()
+bar + coord_polar()
+```
+
+3.9.1
+
+```{r}
+
+practice_bar <- 
+  ggplot(data = diamonds, mapping = aes(x = cut, fill= cut), position="dodge") + 
+  geom_bar()
+
+practice_bar+ coord_polar()
+```
+labels
+
+3.9.1
+The coord_map() function uses map projections to project the three-dimensional Earth onto a two-dimensional plane. By default, coord_map() uses the Mercator projection. This projection is applied to all the geoms in the plot. The coord_quickmap() function uses an approximate but faster map projection. This approximation ignores the curvature of Earth and adjusts the map for the latitude/longitude ratio.
+```{r}
+?labs
+```
+
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
+  geom_point() + 
+  geom_abline() +
+  coord_fixed()
+```
+
+```{r}
+?geom_abline()
+```
+These geoms add reference lines (sometimes called rules) to a plot, either horizontal, vertical, or diagonal (specified by slope and intercept).
+
+```{r}
+?coord_fixed()
+```
+A fixed scale coordinate system forces a specified ratio between the physical representation of data units on the axes. The ratio represents the number of units on the y-axis equivalent to one unit on the x-axis. The default, ratio = 1, ensures that one unit on the x-axis is the same length as one unit on the y-axis
+
+so each unit is the same size and not like above where cty has less values and looks slimmer which makes the graph look different from what it actually shows
+
+3.10 THe layered grammar of graphics
+
+#### CODE TEMPLATE
+
+ggplot(data = <DATA>) + 
+  <GEOM_FUNCTION>(
+     mapping = aes(<MAPPINGS>),
+     stat = <STAT>, 
+     position = <POSITION>
+  ) +
+  <COORDINATE_FUNCTION> +
+  <FACET_FUNCTION>
+
+The seven parameters in the template compose the grammar of graphics, a formal system for building plots. The grammar of graphics is based on the insight that you can uniquely describe any plot as a combination of a dataset, a geom, a set of mappings, a stat, a position adjustment, a coordinate system, and a faceting scheme.
