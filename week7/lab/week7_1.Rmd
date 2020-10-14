@@ -1,0 +1,209 @@
+---
+title: "week7_1"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(mice)
+```
+
+
+```{r}
+install.packages("NHANES")
+```
+
+
+```{r}
+library(NHANES)
+
+df <- nhanes
+head(df)
+```
+```{r}
+head(mice::nhanes)
+# means that I don't want to load the whole package but just the dataset
+```
+
+
+Output the percentage missingness for each feature as a vector.
+
+```{r}
+is.na(df)
+is.na(df$age)
+```
+
+
+```{r}
+colSums(is.na(df))/nrow(df)*100
+
+sum(is.na(df))/sum(df, na.rm = TRUE)*100
+```
+Show these percentages as a barplot.
+
+```{r}
+tibble(
+  nmissing  = colSums(is.na(df)),
+  pmissing = nmissing/row(df)
+) %>%
+  +ggplot(aes(x=rowname, y="%missing", title="Missingness bargraph"))
+  +theme_minimal()+
+
+labs(
+  x="Feature",
+  y="%missing",
+  title="Missingness bargraph"
+)
+
+```
+Now display the missingness pattern per age group (1, 2, 3).
+Hint: use the group_by() function from dplyr.
+
+```{r}
+
+df %>%
+  group_by(age)%>%
+  summarise_all(function(x) sum(is.na(x))/n()*100)%>%
+  round(2)
+
+
+sum(rowSums(is.na(df))==3)
+# only 7 miss all the data except the age variable
+
+```
+Use the md.pattern() function from the mice package to display the missingness patterns. looking at rows that only have 3 missing values
+
+```{r}
+md.pattern(df)
+```
+
+Using this plot, indicate:
+
+how many rows are missing all data except the age feature?
+- 7 miss all the values but the age one
+how many missing values are there in the bmi feature?
+- 9 are missing in BMI
+how many rows are completely observed?
+-  13 
+how many missing data patterns are there?
+- number of rows -> 5 different patterns of missing values
+- the top one shows the complete observation 
+
+-------
+shows that there's seven outputs with this pattern
+numbers in bottom show number of missing values for that column 
+e.g. no NA for age, eight for hyp etc.
+1 = we have the data
+0 = missingness
+
+```{r}
+```
+
+#### assignment with different dataset
+
+Assignment
+Analyze the patterns of missing data for the fdgs dataset, and write a small paragraph on how you are going to solve the missingness in this data for an analyst who wants to compute the average weight of the population under study, assuming MAR.
+
+```{r}
+install.packages("skimr")
+skimr::skim(df)
+
+```
+
+
+```{r}
+head(fdgs)
+
+```
+how many missing values is there and in what columns are they
+```{r}
+summary(is.na(fdgs))
+```
+
+percentage of missing values per column
+
+```{r}
+
+colSums(is.na(fdgs))/nrow(fdgs)*100
+
+```
+
+```{r}
+md.pattern(fdgs)
+
+```
+
+the pattern shows that:
+- 9987 observations are complete/no NA
+- 23 have missing values in both hgt & hgt.z
+- 20 have missing values in wgt & wgt.z
+- the columns id, reg, age & sex have no missing values
+- the columns wgt & wgt.z have each 20 NAs
+- hgt & hgt.z have 23 NAs
+
+```{r}
+transform(fdgs, as.numeric(wgt))
+```
+Regression imputation 
+
+"Moreover, the regression weights are unbiased under MAR if the factors that influence the missingness are part of the regression model."
+
+regression imputation can be used to solve the missingness issue within the weight column to calculate the average weight of the population. This is because MAR is assumed as is that the factors that influence the missingness are part of the model.  (method="norm.predict")
+
+
+```{r}
+imp <- mice(fdgs, method = "norm.predict", seed = 1,
+           m = 1, print = FALSE)
+xyplot(imp, wgt ~ age)
+
+## the very few red circles show where values were added
+```
+store the data to use the dataframe after imputation 
+
+```{r}
+data_imp <- complete(imp)
+mean(data_imp$wgt)
+```
+
+```{r}
+mean(fdgs$wgt, na.rm=TRUE)
+```
+```{r}
+## check standard deviason 
+print("comparing sd")
+sd(fdgs$wgt, na.rm=TRUE)
+sd(data_imp$wgt)
+
+## check variance
+print("comparing variance")
+
+var(fdgs$wgt, na.rm=TRUE)
+var(data_imp$wgt)
+
+```
+
+
+```{r}
+```
+
+## if we used mean imputation for it but it's not a good idea as it will disturb the mean
+```{r}
+fdgs_nomiss <- fdgs
+
+fdgs_nomiss <- within(data = fdgs_nomiss,
+       expr =
+         {
+           wgt <- replace(x = wgt,
+                           list = is.na(x = wgt),
+                           values = mean(x = wgt, na.rm = TRUE) ) 
+         }
+       )
+```
+
+```{r}
+
+```
+
+
+```{r}
+```
+
