@@ -1,0 +1,103 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+install.packages("patchwork")
+```
+
+```{r}
+library(MASS) # make sure to load mass before tidyverse to avoid conflicts!
+library(tidyverse)
+library(ggplot2)
+library(patchwork)
+library(ggdendro)
+library(cluster)
+```
+
+examples from class/the lab with Ayoub
+
+```{r}
+distances <- dist(faithful, method="euclidean")
+result <- hclust(distances, method="average")
+ggdendrogram(result, labels=FALSE)
+
+
+result1 <-hclust(distances, method="complete")
+
+ggdendrogram(result, labels=FALSE) + ggtitle("average") + ylim(0,10)+
+  ggdendrogram(result1, labels=FALSE)+ ggtitle("complete") + ylim(0,10)
+
+cutree(result, h=40)
+cutree(result, k=2)
+
+
+```
+
+
+```{r}
+# 2 hierachical clusterings
+df <- USArrests
+d <- dist(df, method="euclidean")
+hc1 <-hclust(d, method="average")
+hc2 <- hclust(d, method="centroid")
+              
+#Create two dendrograms
+dend1 <- as.dendrogram(hc1)
+dend2 <- as.dendrogram(hc2)
+ggdendrogram(dend1)
+ggdendrogram(dend2)
+```
+
+
+```{r}
+#Dicisive hierachical clustering
+res.diana <-diana(df, stand=TRUE)
+
+#Plot the dendogram
+# another way of plotting a dendogram
+# ouput of the clustering based on top to bottom method (hierachical)
+fviz_dend(res.diana, cex=0.5,
+          k=4,
+          palette="jco")
+
+# Partitional clustering
+pclust <-kmeans(df, centers=3)
+str(pclust)
+pclust
+pclust$centers
+pclust$cluster #uses PCA to plot the clusters
+fviz_cluster(pclust, data=df)
+```
+
+
+```{r}
+# checking out the output of the clusters by plotting the geom points
+# in this case it used the whole dataset to plot which is why it is so scattered 
+
+df%>%
+  as_tibble() %>%
+  mutate(cluster = pclust$cluster, 
+         state=row.names(USArrests))%>%
+  ggplot(aes(UrbanPop, Murder, color= factor(cluster), label=state))+
+  geom_point()
+
+# Determining and Visualizing the optimal number of clusters 
+# like discussed in the lecture - no clear/good answer = open problem
+# using different methods
+# each method has a somewhat different answer but checking the output of clustering ans number of clusters to find the optimum number of clusters
+
+fviz_nbclust(df, FUN=hcut, method="wss")# elbow method
+fviz_nbclust(df, FUN=hcut, method="silhouette")#average silhouette method
+gap_stat <-clusGap(df, FUN=hcut, nstart=25, K.max=10, B=50)
+fviz_gap_stat(gap_stat) #gap statistic method
+
+```
+
+
+```{r}
+view(USArrests)
+
+```
+
