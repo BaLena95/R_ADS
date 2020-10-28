@@ -73,8 +73,11 @@ Partitional Clustering
 K-means clustering
 
 1. randomly assign observations to K clusters
+
 2a. calculate mean (centroid) for each (random) cluster
+
 2b. assign each observation to its closest cluster
+
 3. continue going back to 2a as long as the assignments change - then stop
 
 - K are hyperparameters (=a parameter whose value is used to control the learning process) that are determined in advance
