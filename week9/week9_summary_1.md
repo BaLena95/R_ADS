@@ -251,7 +251,7 @@ fit_E_2 <- Mclust(df %>% pull(Diagonal), G = 2, modelNames = "V")
 2 means
 2 variances
 1 class probability
-= 4 parameters
+= 5 parameters
 
 
 
